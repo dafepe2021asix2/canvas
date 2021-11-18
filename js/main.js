@@ -37,6 +37,7 @@ let isDrawing = false;
 let x = 0;
 let y = 0;
 let imatge_forma;
+let imatge_insertar;
 
 const canvas = document.getElementById('area');
 const context = canvas.getContext('2d');
@@ -96,11 +97,41 @@ function carga() {
 
         }
     });
-
+    /*
     document.getElementById("arxiu").addEventListener('change', function () {
         imatge_forma = document.querySelector('input[type=file]').files[0];
-    });
+        console.log("Imaget a insertar: "+imatge_forma);
+    });*/
+    /*document.getElementById("pujar_arxiu_seleccio").addEventListener('change', function (e) {
+        imatge_insertar  = document.getElementById("pujar_arxiu_seleccio").files[0];
+        console.log("Imaget a insertar: "+imatge_insertar);   
+    });*/
 
+    document.getElementById('icono_imagen').addEventListener('click', function (e) {
+        console.log("aqui");
+
+        let estado = this.getAttribute("pulsado");
+
+        if (estado === 'true') {
+
+            menu_seleccion_desactivar(document.getElementsByClassName("icono"));
+            this.setAttribute("pulsado", "false");
+            eliminar_eventos();
+
+        }
+        else {
+            eliminar_eventos();
+            menu_seleccion_desactivar(document.getElementsByClassName("icono"));
+            menu_seleccion_activar(this);
+            dibujar_imagen_insertar();
+
+            //crear eventos
+
+
+
+        }
+
+    });
     document.getElementById('icono_forma').addEventListener('click', function (e) {
 
         let estado = this.getAttribute("pulsado");
@@ -270,6 +301,42 @@ function goma_levantar(e) {
     }
 
 }
+
+
+function dibujar_imagen_insertar() {
+    eliminar_eventos();
+    console.log("se crea enventos de geometria linea")
+    canvas.addEventListener('mousedown', imagen_click);
+    canvas.addEventListener('mousemove', imagen_moviendo);
+    canvas.addEventListener('mouseup', imagen_levantar);
+
+}
+function imagen_click(e) {
+    x = e.offsetX;
+    y = e.offsetY;
+    isDrawing = true;
+}
+function imagen_moviendo(e) {
+    if (isDrawing === true) {
+
+        drawCtx.clearRect(0, 0, 1500, 900);
+        Seleecion_insertar_imagen(drawCtx, x, y, e.offsetX - x, e.offsetY - y);
+
+    }
+}
+function imagen_levantar(e) {
+    if (isDrawing === true) {
+        Seleecion_insertar_imagen(context, x, y, e.offsetX - x, e.offsetY - y);
+        drawCtx.clearRect(0, 0, 1500, 900);
+        x = 0;
+        y = 0;
+        isDrawing = false;
+    }
+
+}
+
+
+
 function dibujar_geometria_cuadrado() {
     eliminar_eventos();
     console.log("se crea enventos de geometria linea")
@@ -540,6 +607,11 @@ function eliminar_eventos() {
     canvas.removeEventListener('mousedown', rectangulo_texto_click);
     canvas.removeEventListener('mousemove', rectangulo_text_moviendo);
     canvas.removeEventListener('mouseup', rectangulo_texto_levantar);
+
+    canvas.removeEventListener('mousedown', imagen_click);
+    canvas.removeEventListener('mousemove', imagen_moviendo);
+    canvas.removeEventListener('mouseup', imagen_levantar);
+
 
 
 
@@ -1013,6 +1085,58 @@ function dibujartextoRectangulo(context2, x1, y1, x2, y2, estado) {
     }
 
     console.log(x1, y1, x2, y2)
+}
+function Seleecion_insertar_imagen(context2, x1, y1, x2, y2) {
+
+    console.log("cargas imagen");
+    /*
+    let rgbcolorVora = hexToRgb(document.getElementById('selector_color').value);
+    let colorOpacitatVora = `rgba(${rgbcolorVora.r},${rgbcolorVora.g},${rgbcolorVora.b},${document.getElementById('opacitat_forma').value})`;
+    let rgbcolorFons = hexToRgb(document.getElementById('selector_color2').value);
+    let colorOpacitatFons = `rgba(${rgbcolorFons.r},${rgbcolorFons.g},${rgbcolorFons.b},${document.getElementById('opacitat_forma').value})`;
+    let valores = document.getElementById('tipus_linea').options[document.getElementById('tipus_linea').selectedIndex].value;
+    console.log(valores);
+    valores = parseInt(valores);
+    */
+
+ //context2.setLineDash([10, 10]);
+
+
+    //context2.strokeStyle = colorOpacitatVora;
+    //context2.fillStyle = colorOpacitatFons;
+    //context2.lineWidth = document.getElementById('grosor_forma_dif').value;
+
+    var archivo  = document.getElementById("archivo");
+    console.log(archivo.files);
+    if (!archivo.files || !archivo.files[0]) return;
+    console.log("pasa");
+    
+    const FR = new FileReader();
+    FR.addEventListener("load", (evt) => {
+        const img = new Image();
+        img.addEventListener("load", () => {
+        context2.clearRect(0, 0, context2.canvas.width, context2.canvas.height);
+        context2.drawImage(img, 200, 200);
+        });
+        img.src = evt.target.result;
+    });
+    FR.readAsDataURL(archivo.files[0]);
+
+    console.log("imagen "+archivo);
+    console.log("imagen "+FR);
+
+    /*
+    console.log(imatge_insertar.name);
+    let imatge = new Image();
+    imatge.src = URL.createObjectURL(imatge_insertar);
+    imatge.onload = function(){
+        let pattern = context2.createPattern(imatge, 'repeat');
+        context2.fillStyle = pattern;
+        context2.fillRect(x1, y1, x2, y2);
+    }
+    context2.strokeRect(x1, y1, x2, y2);
+    console.log(x1, y1, x2, y2)
+    */
 }
 function trasladar(context2, x1, y1) {
     /*
