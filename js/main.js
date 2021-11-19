@@ -180,6 +180,8 @@ function carga() {
     document.getElementById("triangulo").addEventListener("click", dibujar_geometria_triangulo);
     document.getElementById("cercle").addEventListener("click", dibujar_geometria_circulo);
     //document.getElementById("rombe").addEventListener("click", dibujar_geometria_rombe);
+    document.getElementById("negatiu").addEventListener("click", canvas_negatiu);
+    document.getElementById("gris").addEventListener("click", canvas_gris);
 
     document.getElementById('icono_guardar').addEventListener('click', function (e) {
 
@@ -206,6 +208,46 @@ function carga() {
         }
     });
 
+    
+
+
+
+}
+function canvas_negatiu() {
+    console.log("se pasa el canvas a negativo");
+    var destX = 0;
+    var destY = 0;
+
+    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    var pixels = imageData.data;
+    for (var i = 0; i < pixels.length; i += 4) {
+        pixels[i] = 255 - pixels[i]; // red
+        pixels[i+1] = 255 - pixels[i+1]; // green
+        pixels[i+2] = 255 - pixels[i+2]; // blue
+        // i+3 es alpha
+    }
+    // modifiquem original
+    context.putImageData(imageData, 0, 0);
+
+
+}
+function canvas_gris() {
+    console.log("se pasa el canvas a negativo");
+    var destX = 0;
+    var destY = 0;
+
+    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    var pixels = imageData.data;
+    for (var i = 0; i < pixels.length; i += 4) {
+        var med = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+        // set it to each value (r = g = b = med)
+        pixels[i] = pixels[i + 1] = pixels[i + 2] = med;
+
+
+        // i+3 es alpha
+    }
+    // modifiquem original
+    context.putImageData(imageData, 0, 0);
 
 
 }
@@ -320,13 +362,13 @@ function imagen_moviendo(e) {
     if (isDrawing === true) {
 
         drawCtx.clearRect(0, 0, 1500, 900);
-        Seleecion_insertar_imagen(drawCtx, x, y, e.offsetX - x, e.offsetY - y);
+        Seleecion_insertar_imagen(drawCtx, x, y, e.offsetX - x, e.offsetY - y, true);
 
     }
 }
 function imagen_levantar(e) {
     if (isDrawing === true) {
-        Seleecion_insertar_imagen(context, x, y, e.offsetX - x, e.offsetY - y);
+        Seleecion_insertar_imagen(context, x, y, e.offsetX - x, e.offsetY - y, false);
         drawCtx.clearRect(0, 0, 1500, 900);
         x = 0;
         y = 0;
@@ -1073,20 +1115,14 @@ function dibujartextoRectangulo(context2, x1, y1, x2, y2, estado) {
     /////
 
     if (estado) {
-        if (document.getElementById('forma_plena').checked == true) {
-            context2.fillRect(x1, y1, x2, y2);
-            context2.strokeRect(x1, y1, x2, y2);
-
-        } else {
             context2.moveTo(x1, y1);
             context2.strokeRect(x1, y1, x2, y2);
-        }
 
     }
 
     console.log(x1, y1, x2, y2)
 }
-function Seleecion_insertar_imagen(context2, x1, y1, x2, y2) {
+function Seleecion_insertar_imagen(context2, x1, y1, x2, y2,estado) {
 
     console.log("cargas imagen");
     /*
@@ -1106,24 +1142,23 @@ function Seleecion_insertar_imagen(context2, x1, y1, x2, y2) {
     //context2.fillStyle = colorOpacitatFons;
     //context2.lineWidth = document.getElementById('grosor_forma_dif').value;
 
-    var archivo  = document.getElementById("archivo");
-    console.log(archivo.files);
-    if (!archivo.files || !archivo.files[0]) return;
-    console.log("pasa");
-    
-    const FR = new FileReader();
-    FR.addEventListener("load", (evt) => {
-        const img = new Image();
-        img.addEventListener("load", () => {
-        context2.clearRect(0, 0, context2.canvas.width, context2.canvas.height);
-        context2.drawImage(img, 200, 200);
-        });
-        img.src = evt.target.result;
-    });
-    FR.readAsDataURL(archivo.files[0]);
+    let imatge_source = document.getElementById('imatge_precarregade').options[document.getElementById('imatge_precarregade').selectedIndex].value;
 
-    console.log("imagen "+archivo);
-    console.log("imagen "+FR);
+    context2.setLineDash([10, 10]);
+    if (estado) {
+        context2.strokeRect(x1, y1, x2, y2);
+
+    }
+    context2.stroke();
+    let imatge = new Image();
+    imatge.src = imatge_source;
+    imatge.onload = function(){
+        //context2.clearRect(0, 0, context2.canvas.width, context2.canvas.height);
+        context2.drawImage(imatge, x1, y1 , x2,y2);
+    }
+
+
+
 
     /*
     console.log(imatge_insertar.name);
